@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Avalonia;
 using Avalonia.Controls;
@@ -9,7 +10,7 @@ namespace AvaloniaCurves;
 
 public class TickControl : Control
 {
-    Eco eco;
+    Pixels pixels;
     private DispatcherTimer timer;
 
     static TickControl()
@@ -17,19 +18,17 @@ public class TickControl : Control
         AffectsRender<TickControl>(AngleProperty);
     }
 
-    readonly int fieldSize = 10;
-    readonly int grassStart = 5;
-    readonly int bunnyStart = 1;
-    readonly int wolfStart = 0;
+    readonly int fieldSize = 100;
 
     public TickControl()
     {
+        List<string> names = new List<string> { "Grass", "Bunny", "Wolf", "Fox", "Bear", "Deer", "Moose", "Rabbit", "Squirrel", "Hare", "Hedgehog", "Raccoon", "Beaver", "Otter", "Mink", "Weasel", "Badger", "Skunk", "Opossum", "Porcupine", "Armadillo", "Anteater", "Sloth", "Aardvark", "Elephant", "Rhino", "Hippopotamus", "Giraffe", "Okapi", "Zebra", "Horse", "Donkey", "Mule", "Tapir", "Pig", "Warthog", "Hog", "Boar", "Peccary", "Camel", "Llama", "Alpaca", "Guanaco", "Vicuna", "Whale", "Dolphin", "Porpoise", "Orca", "Manatee", "Dugong", "Seal", "Sea Lion", "Walrus", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown" };
 
-        eco = new Eco(fieldSize, fieldSize, grassStart, bunnyStart, wolfStart);
+        pixels = new Pixels(fieldSize, fieldSize, names);
 
         timer = new DispatcherTimer();
-        timer.Interval = TimeSpan.FromSeconds(1 / 30.0);
-        timer.Tick += (sender, e) => { Angle += Math.PI / 360; eco.SimulateStep(); };
+        timer.Interval = TimeSpan.FromSeconds(1 / 10.0);
+        timer.Tick += (sender, e) => { Angle += Math.PI / 360; pixels.NextStep(); };
 
         // timer.Start();
     }
@@ -48,68 +47,40 @@ public class TickControl : Control
         set => SetValue(AngleProperty, value);
     }
 
+
     public override void Render(DrawingContext ctx)
     {
-        double grassCounter = Math.Round(eco.GrassSumValue, 2);
-        int bunnyCounter = eco.bunnies.Count;
-        int wolfCounter = eco.wolves.Count;
+        string text;
 
-        double dx = 700.0 / eco.Width;
-        double dy = 700.0 / eco.Height;
 
-        //рисуем траву
-        for (int x = 0; x < eco.Width; x++)
-            for (int y = 0; y < eco.Width; y++)
+        double dx = 700.0 / pixels.Width;
+        double dy = 700.0 / pixels.Height;
+        byte r, g, b;
+
+        //рисуем пиксели
+        for (int x = 0; x < pixels.Width; x++)
+            for (int y = 0; y < pixels.Width; y++)
             {
-                var value = eco.grass[x, y].Value;
-                byte r, g, b;
-                r = g = b = 255;
-                if (value > 0)
-                {
-                    r = b = 0;
-                    g = (byte)(200 - value / Eco.GRASS_LIMIT * 100);
-                }
+                ctx.DrawRectangle(Brushes.Black, null, new Rect(260, 700, 500, 30));
+                r = (byte)pixels[x, y].R;
+                g = (byte)pixels[x, y].G;
+                b = (byte)pixels[x, y].B;
+                text = pixels[x, y].ToString();
 
+                // text = pixels[x, y].Name + " - " + r + " " + g + " " + b;
                 var brush = new SolidColorBrush(Color.FromRgb(r, g, b), 1);
 
+
+                var formattedText = new FormattedText(
+                    text,
+                    CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight,
+                    new Typeface("Arial"),
+                    16,
+                    Brushes.White
+                );
                 ctx.DrawRectangle(brush, null, new Rect(dx * x, dy * y, dx, dy));
+                ctx.DrawText(formattedText, new Point(260, 700));
             }
-
-        //рисуем кроликов
-        foreach (var bunny in eco.bunnies)
-        {
-            var brush = Brushes.Yellow;
-            ctx.DrawEllipse(brush, null, new Rect(dx * bunny.X + 2, dy * bunny.Y + 2, dx - 3, dy - 3));
-        }
-
-        // рисуем волков
-        foreach (var wolf in eco.wolves)
-        {
-            var brush = Brushes.Red;
-            ctx.DrawEllipse(brush, null, new Rect(dx * wolf.X + 1, dy * wolf.Y + 1, dx - 2, dy - 2));
-        }
-
-        var text = $"Grass: {grassCounter}; Bunnies: {bunnyCounter}; Wolves: {wolfCounter}";
-        var formattedText = new FormattedText(
-            text,
-            CultureInfo.CurrentCulture,
-            FlowDirection.LeftToRight,
-            new Typeface("Arial"),
-            16,
-            Brushes.White
-        );
-        ctx.DrawText(formattedText, new Point(260, 700));
-
-        var text2 = $"1 sub = 1 bunny \n1000 subs = 1 wolf";
-        var formattedText2 = new FormattedText(
-            text2,
-            CultureInfo.CurrentCulture,
-            FlowDirection.LeftToRight,
-            new Typeface("Arial"),
-            20,
-            Brushes.White
-        );
-        ctx.DrawText(formattedText2, new Point(70, 710));
-
     }
 }
