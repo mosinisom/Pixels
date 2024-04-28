@@ -6,6 +6,7 @@ using Avalonia.Media;
 class Pixels
 {
     ColorAndName white = new ColorAndName(255, 255, 255, "white");
+    public ColorAndName LastFilledColor;
     public int Width { get; init; }
     public int Height { get; init; }
     public List<string> Names { get; init; }
@@ -49,29 +50,55 @@ class Pixels
         return colors;
     }
 
+
+    // public void NextStep()
+    // {
+    //     int index = 0;
+
+    //     for (int x = 0; x < Width; x++)
+    //     {
+    //         for (int y = 0; y < Height; y++)
+    //         {
+    //             if (index >= index2)
+    //                 break;
+
+    //             colorAndNames[x, y] = allColors[index];
+    //             index++;
+    //         }
+    //     }
+
+    //     if (index2 < allColors.Count)
+    //         index2++;
+    // }
+
     int index2 = 0;
+    int currentX = 0;
+    int currentY = 0;
+
     public void NextStep()
     {
-        int index = 0;
+        if (index2 < allColors.Count)
+        {
+            colorAndNames[currentX, currentY] = allColors[index2];
+            LastFilledColor = allColors[index2];
+            index2++;
 
-        for (int x = 0; x < Width; x++)
-            for (int y = 0; y < Height; y++)
+            currentX++;
+            if (currentX >= Width)
             {
-                if (index >= index2)
-                    colorAndNames[x, y] = white;
-                else
-                    colorAndNames[x, y] = allColors[index++];
+                currentX = 0;
+                currentY++;
+                if (currentY >= Height)
+                {
+                    currentY = 0; 
+                }
             }
-        if (index2 < allColors.Count) index2++;
+        }
     }
 
 
 
 
-
-
-
-
-
-
 }
+
+

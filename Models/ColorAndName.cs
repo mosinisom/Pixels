@@ -1,3 +1,5 @@
+using System;
+
 public class ColorAndName(int r, int g, int b, string name)
 {
     public int R { get; set; } = r;
@@ -7,6 +9,6 @@ public class ColorAndName(int r, int g, int b, string name)
 
     public override string ToString()
     {
-        return $"{Name} - {R} {G} {B}";
+        return $"{Name} {Math.Abs(R)} {Math.Abs(G)} {Math.Abs(B)}";
     }
 }

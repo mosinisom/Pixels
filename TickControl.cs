@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Media;
 using Avalonia.Threading;
 
@@ -12,22 +14,30 @@ public class TickControl : Control
 {
     Pixels pixels;
     private DispatcherTimer timer;
+    private int colorIndex = 0;
 
     static TickControl()
     {
         AffectsRender<TickControl>(AngleProperty);
     }
 
-    readonly int fieldSize = 100;
 
     public TickControl()
     {
-        List<string> names = new List<string> { "Grass", "Bunny", "Wolf", "Fox", "Bear", "Deer", "Moose", "Rabbit", "Squirrel", "Hare", "Hedgehog", "Raccoon", "Beaver", "Otter", "Mink", "Weasel", "Badger", "Skunk", "Opossum", "Porcupine", "Armadillo", "Anteater", "Sloth", "Aardvark", "Elephant", "Rhino", "Hippopotamus", "Giraffe", "Okapi", "Zebra", "Horse", "Donkey", "Mule", "Tapir", "Pig", "Warthog", "Hog", "Boar", "Peccary", "Camel", "Llama", "Alpaca", "Guanaco", "Vicuna", "Whale", "Dolphin", "Porpoise", "Orca", "Manatee", "Dugong", "Seal", "Sea Lion", "Walrus", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown Bear", "Black Bear", "Grizzly", "Kodiak", "Polar Bear", "Panda", "Sloth Bear", "Spectacled Bear", "Sun Bear", "Brown" };
-
+        List<string> names = new List<string>();
+        using (System.IO.StreamReader file = new System.IO.StreamReader("names.txt"))
+        {
+            string line;
+            while ((line = file.ReadLine()) != null)
+            {
+                names.Add(line);
+            }
+        }
+        int fieldSize = (int)Math.Sqrt(names.Count) + 1;
         pixels = new Pixels(fieldSize, fieldSize, names);
 
         timer = new DispatcherTimer();
-        timer.Interval = TimeSpan.FromSeconds(1 / 10.0);
+        timer.Interval = TimeSpan.FromSeconds(1 / 3.0);
         timer.Tick += (sender, e) => { Angle += Math.PI / 360; pixels.NextStep(); };
 
         // timer.Start();
@@ -57,30 +67,49 @@ public class TickControl : Control
         double dy = 700.0 / pixels.Height;
         byte r, g, b;
 
+        ColorAndName currentColor;
+
         //рисуем пиксели
+
         for (int x = 0; x < pixels.Width; x++)
-            for (int y = 0; y < pixels.Width; y++)
+        {
+            for (int y = 0; y < pixels.Height; y++)
             {
-                ctx.DrawRectangle(Brushes.Black, null, new Rect(260, 700, 500, 30));
-                r = (byte)pixels[x, y].R;
-                g = (byte)pixels[x, y].G;
-                b = (byte)pixels[x, y].B;
-                text = pixels[x, y].ToString();
+                if (colorIndex >= pixels.allColors.Count)
+                    colorIndex = 0;
 
-                // text = pixels[x, y].Name + " - " + r + " " + g + " " + b;
+                currentColor = pixels[x, y];
+                ctx.DrawRectangle(Brushes.DarkGray, null, new Rect(0, 700, 700, 50));
+                r = (byte)currentColor.R;
+                g = (byte)currentColor.G;
+                b = (byte)currentColor.B;
+
+
+                // text = pixels.allColors[colorIndex].Name + "  " + (byte)pixels.allColors[colorIndex].R + " " + (byte)pixels.allColors[colorIndex].G + " " + (byte)pixels.allColors[colorIndex].B;
                 var brush = new SolidColorBrush(Color.FromRgb(r, g, b), 1);
-
-
-                var formattedText = new FormattedText(
-                    text,
-                    CultureInfo.CurrentCulture,
-                    FlowDirection.LeftToRight,
-                    new Typeface("Arial"),
-                    16,
-                    Brushes.White
-                );
                 ctx.DrawRectangle(brush, null, new Rect(dx * x, dy * y, dx, dy));
-                ctx.DrawText(formattedText, new Point(260, 700));
+
+
+
             }
+        }
+        colorIndex++;
+
+        if (pixels.LastFilledColor != null)
+        {
+            text = pixels.LastFilledColor.ToString();
+            var formattedText = new FormattedText(
+                        text,
+                        CultureInfo.CurrentCulture,
+                        FlowDirection.LeftToRight,
+                        new Typeface("Arial"),
+                        30,
+                        Brushes.White
+                    );
+            var textColorBrush = new SolidColorBrush(Color.FromRgb((byte)pixels.LastFilledColor.R, (byte)pixels.LastFilledColor.G, (byte)pixels.LastFilledColor.B));
+            ctx.DrawRectangle(textColorBrush, null, new Rect(220, 700, formattedText.Width, 30));
+
+            ctx.DrawText(formattedText, new Point(220, 700));
+        }
     }
 }
